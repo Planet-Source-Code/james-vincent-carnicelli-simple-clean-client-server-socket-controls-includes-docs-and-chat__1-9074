@@ -1,0 +1,187 @@
+<HTML>
+<HEAD>
+<TITLE>TCP/IP Socket Controls Help - ServerSocketBank</TITLE>
+</HEAD>
+<BODY BGCOLOR="#FFFFFF"><FONT FACE="Arial">
+
+
+<CENTER>
+<FONT SIZE="+3" COLOR="#000099"><B>
+ <A HREF="help.html">&lt;</A> &nbsp;
+ Sockets - ServerSocketBank Control </B></FONT>
+<BR><FONT SIZE="+1"> Reference Documentation </FONT>
+<HR>
+</CENTER>
+
+
+<P><FONT SIZE="+2" COLOR="#000099"><B> Table of Contents </B></FONT>
+
+<UL>
+  <LI><A HREF="#declarations"> Public Declarations</A>
+  <LI><A HREF="#properties"> Public Properties</A>
+  <LI><A HREF="#methods"> Public Methods</A>
+  <LI><A HREF="#events"> Public Events</A>
+</UL>
+
+
+<A NAME="declarations">
+<P><FONT SIZE="+2" COLOR="#000099"><B> Public Declarations </B></FONT>
+<BR>The ServerSocketBank control offers no public declarations.
+
+
+<A NAME="properties">
+<P><FONT SIZE="+2" COLOR="#000099"><B> Public Properties </B></FONT>
+<BR>In addition to the properties implicitly available through Visual Basic, like <TT>.Name</TT> and <TT>.Tag</TT>, the ServerSocketBank control explicitly offers a few publicly available properties:
+
+<P>
+<A HREF="#property_ExtraTag">ExtraTag</A> |
+<A HREF="#property_Listening">Listening</A> |
+<A HREF="#property_MaxSocket">MaxSocket</A> |
+<A HREF="#property_Port">Port</A> |
+<A HREF="#property_Socket">Socket</A> |
+<A HREF="#property_SocketCount">SocketCount</A>
+
+
+<A NAME="property_ExtraTag">
+<P><FONT SIZE="+1" COLOR="#006699"><B> ExtraTag </B></FONT>
+<BR><I> Read/Write, Variant </I>
+<BR>Stores a miscellaneous datum of any type a Variant can store.  Same basic functionality as <TT>.Tag</TT>.  The control never uses this datum for decision-making, nor changes it.
+
+<A NAME="property_Listening">
+<P><FONT SIZE="+1" COLOR="#006699"><B> Listening </B></FONT>
+<BR><I> Read-Only, Boolean </I>
+<BR>Is this control currently listening for incoming connections?  See <TT><A HREF="#method_Listen">.Listen()</A></TT> for more.
+
+<A NAME="property_MaxSocket">
+<P><FONT SIZE="+1" COLOR="#006699"><B> MaxSocket </B></FONT>
+<BR><I> Read-Only, Integer </I>
+<BR>The index (0 = none in use) of the highest socket in use.  This is not the same as the <TT><A HREF="#property_SocketCount">.SocketCount()</A></TT>.  If, for example, two of the first four connections made disconnects, <TT><A HREF="#property_SocketCount">.SocketCount()</A></TT> will be 2, while <TT>.MaxSocket</TT> will be 4.  This value will never get smaller, but will grow by one each time one more connection is added when all the available sockets are in use.
+
+<A NAME="property_Port">
+<P><FONT SIZE="+1" COLOR="#006699"><B> Port </B></FONT>
+<BR><I> Read/Write, Integer </I>
+<BR>The port (e.g., "80" or "23") that the control is listening for connections on.  Changing this value while listening has no effect until <TT><A HREF="#method_Listen">.Listen()</A></TT> is again called.
+
+<A NAME="property_Socket">
+<P><FONT SIZE="+1" COLOR="#006699"><B> Socket(Index) </B></FONT>
+<BR><I> Read-Only, ServerSocket </I>
+<BR>Returns a reference to the <A HREF="serversocket.html">ServerSocket</A> control in the bank identified by <TT>Index</TT>.  <TT>Index</TT> must be smaller than <TT><A HREF="#property_MaxSocket">.MaxSocket</A></TT>.  To get a list of the sockets actually in use (connected), use the following algorithm:
+
+<P><PRE>
+<FONT COLOR="#000099">For</FONT> i = 1 <FONT COLOR="#000099">To</FONT> SSB.MaxSocket
+    <FONT COLOR="#000099">If</FONT> SSB.IsInUse(i) <FONT COLOR="#000099">Then</FONT>
+        <FONT COLOR="#009900">'Do your thing here</FONT>
+    <FONT COLOR="#000099">End If</FONT>
+<FONT COLOR="#000099">Next</FONT>
+</PRE>
+
+<P>The condition will be met exactly <TT><A HREF="#property_SocketCount">.SocketCount</A></TT> times.
+
+<A NAME="property_SocketCount">
+<P><FONT SIZE="+1" COLOR="#006699"><B> SocketCount </B></FONT>
+<BR><I> Read-Only, Integer </I>
+<BR>How many sockets in this bank are currently in use (connected)?  This is not the same as <TT><A HREF="#property_MaxSocket">MaxSocket</A></TT>.  Use <TT><A HREF="#method_IsInUse">.IsInUse</A></TT> to determine which sockets are actually in use.
+
+
+<A NAME="methods">
+<P><FONT SIZE="+2" COLOR="#000099"><B> Public Methods </B></FONT>
+<BR>The ServerSocketBank control explicitly offers a number of publicly available methods:
+
+<P>
+<A HREF="#method_DoEvents_">DoEvents_</A> |
+<A HREF="#method_Broadcast">Broadcast</A> |
+<A HREF="#method_BroadcastBinary">BroadcastBinary</A> |
+<A HREF="#method_DisconnectAll">DisconnectAll</A> |
+<A HREF="#method_IsInUse">IsInUse</A> |
+<A HREF="#method_Listen">Listen</A> |
+<A HREF="#method_StopListening">StopListening</A>
+
+
+<A NAME="method_DoEvents_">
+<P><FONT SIZE="+1" COLOR="#006699"><B> DoEvents_ </B></FONT>
+<BR><TT> Sub DoEvents_() </TT>
+<P>This just executes VB's built in <TT>DoEvents</TT> statement.  It's mainly included for VBScript programs, which don't have DoEvents available.
+
+<A NAME="method_Broadcast">
+<P><FONT SIZE="+1" COLOR="#006699"><B> Broadcast </B></FONT>
+<BR><TT> Sub Broadcast(Text As String) </TT>
+<P><TT><A HREF="serversocket.html#method_Send">.Send</A></TT> the specified text to all the <A HREF="#property_Socket">sockets</A> currently <A HREF="#method_IsInUse">in use</A>.
+
+<A NAME="method_BroadcastBinary">
+<P><FONT SIZE="+1" COLOR="#006699"><B> BroadcastBinary </B></FONT>
+<BR><TT> Sub BroadcastBinary(ByteArray) </TT>
+<P><A HREF="serversocket.html#method_SendBinary">Send</A> the specified contents of the byte array to all the <A HREF="#property_Socket">sockets</A> currently <A HREF="#method_IsInUse">in use</A>.
+
+<A NAME="method_DisconnectAll">
+<P><FONT SIZE="+1" COLOR="#006699"><B> DisconnectAll </B></FONT>
+<BR><TT> Sub DisconnectAll() </TT>
+<P><A HREF="serversocket.html#method_Disconnect">Disconnects</A> all sockets that are <A HREF="#method_IsInUse">in use (connected)</A>.  This does not cause this control to <A HREF="#method_StopListening">stop listening</A> for new connections.  To do this and kill all the connections, call <TT><A HREF="#method_StopListening">.StopListening</A></TT> before calling <TT>.DisconnectAll</TT>.
+
+<A NAME="method_IsInUse">
+<P><FONT SIZE="+1" COLOR="#006699"><B> IsInUse </B></FONT>
+<BR><TT> Function IsInUse(Index As Integer) </TT>
+<P>Is the specified socket current in use (connected)?  For an example of how this is used, see the <TT><A HREF="#property_Socket">.Socket</A></TT> property.
+
+<A NAME="method_Listen">
+<P><FONT SIZE="+1" COLOR="#006699"><B> Listen </B></FONT>
+<BR><TT> Sub Listen(Optional Port) </TT>
+<P>Start listening for connection requests from client sockets.  The <TT><A HREF="#event_ConnectionRequest">ConnectionRequest</A></TT> event is triggered when a client attempts to connect.  If the control is already <TT><A HREF="#property_Listening">.Listening</A></TT>, it will stop listening on the current <TT><A HREF="#property_Port">.Port</A></TT> and start listening on the new one.  If <TT>Port</TT> is not specified, the previously-specified <TT><A HREF="#property_Port">.Port</A></TT> is used.  To stop listening, use the <TT><A HREF="#method_StopListening">.StopListening</A></TT> method.
+
+<A NAME="method_StopListening">
+<P><FONT SIZE="+1" COLOR="#006699"><B> StopListening </B></FONT>
+<BR><TT> Sub StopListening() </TT>
+<P>Stop listening for connection requests from client sockets.  Calling this method when the control is not <TT><A HREF="#property_Listening">.Listening</A></TT> does nothing.  To start listening, again, use the <TT><A HREF="#method_Listen">.Listen</A></TT> method.  Note that this method does not cause the connections to <A HREF="#method_DisconnectAll">disconnect</A>.  To do that, use <TT><A HREF="#method_DisconnectAll">.DisconnectAll</A></TT>.
+
+
+<A NAME="events">
+<P><FONT SIZE="+2" COLOR="#000099"><B> Public Events </B></FONT>
+<BR>The ServerSocketBank control raises a subset of the standard events the TextBox control raises.  Please refer to VB's documentation for more information.  In addition to these, a number of others are automatically raised, like <TT>LostFocus()</TT>.  These are the events explicitly supported:
+
+<P>
+<A HREF="#event_Connected">Connected</A> |
+<A HREF="#event_ConnectionRequest">ConnectionRequest</A> |
+<A HREF="#event_DataArrival">DataArrival</A> |
+<A HREF="#event_Disconnect">Disconnect</A> |
+<A HREF="#event_Error">Error</A>
+
+
+<A NAME="event_Connected">
+<P><FONT SIZE="+1" COLOR="#006699"><B> Connected </B></FONT>
+<BR><TT> Event  Connected(Index As Integer, Socket As ServerSocket) </TT>
+<P>The <TT><A HREF="#event_ConnectionRequest">ConnectionRequest</A></TT> has just been called and the connection request was not rejected.  <TT>Index</TT> identifies which socket in this bank was connected.  <TT>Socket</TT> is a reference to that actual <TT><A HREF="serversocket.html">ServerSocket</A></TT> control.  This would be a great time to send a greeting to the client socket using something like:
+
+<P><PRE>
+Socket.Send "MyServer 1.0" & vbCrLf
+</PRE>
+
+<A NAME="event_ConnectionRequest">
+<P><FONT SIZE="+1" COLOR="#006699"><B> ConnectionRequest </B></FONT>
+<BR><TT> Event  ConnectionRequest(RequestID As Long, FromHost As String, Cancel As Boolean, ExtraTag As Variant) </TT>
+<P>A client socket has attempted to connect to this server on its <TT><A HREF="#property_Port">.Port</A></TT>.  <TT>FromHost</TT> will contain a host name (e.g., "yahoo.com") or, if none is found, an IP address (e.g., "51.1.10.255").  This can be used to decide whether or not to accept the request.  To reject it, set <TT>Reject = True</TT>.  It will otherwise be accepted.  If one does not plan on rejecting any connection request, it's not necessary for his program to handle this event.  To set the soon-to-be-connected <A HREF="serversocket.html">ServerSocket</A> control's <A HREF="serversocket.html#property_ExtraTag">.ExtraTag</A> property at this time, one can do so by setting the <TT>ExtraTag</TT> parameter passed in.  The <TT><A HREF="#event_Connected">Connected</A></TT> event will be raised immediately after this one if the connection is not rejected.
+
+<A NAME="event_DataArrival">
+<P><FONT SIZE="+1" COLOR="#006699"><B> DataArrival </B></FONT>
+<BR><TT> Event  DataArrival(Index As Integer, Socket As ServerSocket, Bytes As Long) </TT>
+<P>One of the <A HREF="serversocket.html">server sockets</A> in this bank has had data <A HREF="serversocket.html#event_DataArrival">arrive</A>.  <TT>Index</TT> identifies which socket in this bank received data.  <TT>Socket</TT> is a reference to that actual <TT><A HREF="serversocket.html">ServerSocket</A></TT> control.  One can use its <TT><A HREF="serversocket.html#method_Receive">.Receive</A></TT> method as follows to get at the data:
+
+<P><PRE>
+Buffer = Buffer & Socket.Receive
+</PRE>
+
+<P><TT>Bytes</TT> identifies the <A HREF="serversocket.html#property_BytesReceived">.BytesReceived</A> that have yet to be received from the socket's internal buffer.
+
+<A NAME="event_Disconnect">
+<P><FONT SIZE="+1" COLOR="#006699"><B> Disconnect </B></FONT>
+<BR><TT> Event  Disconnect(Index As Integer, Socket As ServerSocket) </TT>
+<P>One of the <A HREF="serversocket.html">ServerSocket</A> connections has been dropped.  <TT>Index</TT> identifies which socket in this bank was disconnected.  <TT>Socket</TT> is a reference to that actual <TT><A HREF="serversocket.html">ServerSocket</A></TT> control.  This event won't be raised if <TT><A HREF="serversocket.html#method_Disconnect">.Disconnect</A></TT> was called.  If <TT><A HREF="#event_Error">Error</A></TT> is raised, this event will be raised immediately after, too.
+
+<A NAME="event_Error">
+<P><FONT SIZE="+1" COLOR="#006699"><B> Error </B></FONT>
+<BR><TT> Event  Error(Index As Integer, Socket As ServerSocket, Number As Integer, Description As String) </TT>
+<P>A fatal error occurred in one of the sockets.  If it were the internal <A HREF="listenersocket.html">listener</A>, <TT>Index</TT> would be zero and <TT>Socket</TT> would be <TT>Nothing</TT>.  This control will have <A HREF="#method_StopListening">stopped listening</A> for new connections.
+
+<P>If the error was otherwise raised by one of the <A HREF="serversocket.html">server sockets</A>, <TT>Index</TT> identifies which socket in this bank generated the error and <TT>Socket</TT> is a reference to that actual <TT><A HREF="serversocket.html">ServerSocket</A></TT> control.  <TT>Number</TT> is the error code.  <TT>Description</TT> is a human-readable description of the error.
+
+</FONT></BODY>
+</HTML>
+

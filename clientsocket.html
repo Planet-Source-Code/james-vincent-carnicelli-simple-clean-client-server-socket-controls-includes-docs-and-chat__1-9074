@@ -1,0 +1,186 @@
+<HTML>
+<HEAD>
+<TITLE>TCP/IP Socket Controls Help - ClientSocket</TITLE>
+</HEAD>
+<BODY BGCOLOR="#FFFFFF"><FONT FACE="Arial">
+
+
+<CENTER>
+<FONT SIZE="+3" COLOR="#000099"><B>
+ <A HREF="help.html">&lt;</A> &nbsp;
+ Sockets - ClientSocket Control </B></FONT>
+<BR><FONT SIZE="+1"> Reference Documentation </FONT>
+<HR>
+</CENTER>
+
+
+<P><FONT SIZE="+2" COLOR="#000099"><B> Table of Contents </B></FONT>
+
+<UL>
+  <LI><A HREF="#declarations"> Public Declarations</A>
+  <LI><A HREF="#properties"> Public Properties</A>
+  <LI><A HREF="#methods"> Public Methods</A>
+  <LI><A HREF="#events"> Public Events</A>
+</UL>
+
+
+<A NAME="declarations">
+<P><FONT SIZE="+2" COLOR="#000099"><B> Public Declarations </B></FONT>
+<BR>The ClientSocket control offers no public declarations.
+
+
+<A NAME="properties">
+<P><FONT SIZE="+2" COLOR="#000099"><B> Public Properties </B></FONT>
+<BR>In addition to the properties implicitly available through Visual Basic, like <TT>.Name</TT> and <TT>.Tag</TT>, the ClientSocket control explicitly offers a few publicly available properties:
+
+<P>
+<A HREF="#property_BytesReceived">BytesReceived</A> |
+<A HREF="#property_Connected">Connected</A> |
+<A HREF="#property_ExtraTag">ExtraTag</A> |
+<A HREF="#property_Host">Host</A> |
+<A HREF="#property_Port">Port</A>
+
+
+<A NAME="property_BytesReceived">
+<P><FONT SIZE="+1" COLOR="#006699"><B> BytesReceived </B></FONT>
+<BR><I> Read-Only, Long </I>
+<BR>How many bytes (or characters) are there in the buffer where data received are stored?
+
+<A NAME="property_Connected">
+<P><FONT SIZE="+1" COLOR="#006699"><B> Connected </B></FONT>
+<BR><I> Read-Only, Boolean </I>
+<BR>Is the client currently connected to a server socket somewhere?
+
+<A NAME="property_ExtraTag">
+<P><FONT SIZE="+1" COLOR="#006699"><B> ExtraTag </B></FONT>
+<BR><I> Read/Write, Variant </I>
+<BR>Stores a miscellaneous datum of any type a Variant can store.  Same basic functionality as <TT>.Tag</TT>.  The control never uses this datum for decision-making, nor changes it.
+
+<A NAME="property_Host">
+<P><FONT SIZE="+1" COLOR="#006699"><B> Host </B></FONT>
+<BR><I> Read/Write, String </I>
+<BR>The host (e.g., "localhost" or "yahoo.com") or IP address (e.g., "126.0.12.2") that the control is connected or should connect to.  Changing this value during a connection has no effect until a new connection is made.
+
+<A NAME="property_Port">
+<P><FONT SIZE="+1" COLOR="#006699"><B> Port </B></FONT>
+<BR><I> Read/Write, Integer</I>
+<BR>The port (e.g., 80 for HTTP) that the control is connected on or should connect on.  Changing this value during a connection has no effect until a new connection is made.
+
+
+<A NAME="methods">
+<P><FONT SIZE="+2" COLOR="#000099"><B> Public Methods </B></FONT>
+<BR>The ClientSocket control explicitly offers a number of publicly available methods:
+
+<P>
+<A HREF="#method_Connect">Connect</A> |
+<A HREF="#method_Disconnect">Disconnect</A> |
+<A HREF="#method_DoEvents_">DoEvents_</A> |
+<A HREF="#method_Send">Send</A> |
+<A HREF="#method_SendBinary">SendBinary</A> |
+<A HREF="#method_SendInteger">SendInteger</A> |
+<A HREF="#method_SendLong">SendLong</A> |
+<A HREF="#method_Receive">Receive</A> |
+<A HREF="#method_ReceiveBinary">ReceiveBinary</A> |
+<A HREF="#method_ReceiveInteger">ReceiveInteger</A> |
+<A HREF="#method_ReceiveLong">ReceiveLong</A>
+
+
+<A NAME="method_Connect">
+<P><FONT SIZE="+1" COLOR="#006699"><B> Connect </B></FONT>
+<BR><TT> Sub Connect(Optional Host, Optional Port) </TT>
+<P>Attempt to connect to a remote server at <TT>Host</TT> on <TT>Port</TT>.  This routine will not return until it has connected.  If it can't connect, it will raise an error.  Be sure to trap for this error.  If the control is currently <TT><A HREF="#property_Connected">.Connected</A></TT>, <TT><A HREF="#method_Disconnect">.Disconnect</A></TT> will automatically be called before attempting to connect.
+
+<A NAME="method_Disconnect">
+<P><FONT SIZE="+1" COLOR="#006699"><B> Disconnect </B></FONT>
+<BR><TT> Sub Disconnect() </TT>
+<P>Break the connection.  If not <TT><A HREF="#property_Connected">.Connected</A></TT>, this has no effect.
+
+<A NAME="method_DoEvents_">
+<P><FONT SIZE="+1" COLOR="#006699"><B> DoEvents_ </B></FONT>
+<BR><TT> Sub DoEvents_() </TT>
+<P>This just executes VB's built in <TT>DoEvents</TT> statement.  It's mainly included for VBScript programs, which don't have DoEvents available.
+
+<A NAME="method_Send">
+<P><FONT SIZE="+1" COLOR="#006699"><B> Send </B></FONT>
+<BR><TT> Sub Send(Text As String) </TT>
+<P>Send the specified text to the receiving socket.  The string is assumed to be composed of single-byte characters, so each character is converted to a byte using <TT>Asc()</TT>.  Use <TT><A HREF="#method_SendBinary">.SendBinary</A></TT> to send binary data.  The converse of this operation is <TT><A HREF="#method_Receive">.Receive()</A></TT>.
+
+<A NAME="method_SendBinary">
+<P><FONT SIZE="+1" COLOR="#006699"><B> SendBinary </B></FONT>
+<BR><TT> Sub SendBinary(ByteArray) </TT>
+<P>Send the specified byte array to the receiving socket.  Use <TT><A HREF="#method_Send">.Send</A></TT> to send plain text data.  This routine is important for programs that need to transmitting non-text data like pictures.  It's also good for transmitting data using fewer bytes by using binary representations.  The <TT><A HREF="#method_SendLong">.SendLong</A></TT> routine does this using code like the following:
+
+<P><PRE>
+<FONT COLOR="#000099">Private Declare Sub</FONT> CopyMemory <FONT COLOR="#000099">Lib</FONT> "kernel32" <FONT COLOR="#000099">Alias</FONT> "RtlMoveMemory" _
+  (Destination <FONT COLOR="#000099">As Any</FONT>, Source <FONT COLOR="#000099">As Any</FONT>, <FONT COLOR="#000099">ByVal</FONT> Length <FONT COLOR="#000099">As Long</FONT>)
+
+<FONT COLOR="#000099">Public Sub</FONT> SendLong(Value <FONT COLOR="#000099">As Long</FONT>)
+    <FONT COLOR="#000099">Dim</FONT> ByteArray(3) <FONT COLOR="#000099">As Byte</FONT>
+    CopyMemory ByteArray(0), Value, 4
+    SendBinary ByteArray
+<FONT COLOR="#000099">End Sub</FONT>
+</PRE>
+
+<P>Note that Long uses 4 bytes, which is why the array's upper bound is 3 and <TT>CopyMemory</TT> is told to copy 4 bytes.  One can do the same for other basic data types, provided <TT>Value</TT> is of the proper type and the "3" and "4" are replaced with values appropriate to the number of bytes the data type uses.  Consult VB's language help for details about data types and their sizes.
+
+<P>The converse of this operation is <TT><A HREF="#method_ReceiveBinary">.ReceiveBinary()</A></TT>.
+
+<A NAME="method_SendInteger">
+<P><FONT SIZE="+1" COLOR="#006699"><B> SendInteger </B></FONT>
+<BR><TT> Sub SendInteger(Value As Integer) </TT>
+<P>Sends a two-byte representation of the specified integer to the receiving socket.  This is a tidy shorthand to let the user avoid having to do the conversions using <TT>CopyMemory</TT> (see <TT><A HREF="#method_SendBinary">.SendBinary()</A></TT> for an example).  The converse of this operation is <TT><A HREF="#method_ReceiveInteger">.ReceiveInteger()</A></TT>.
+
+<A NAME="method_SendLong">
+<P><FONT SIZE="+1" COLOR="#006699"><B> SendLong </B></FONT>
+<BR><TT> Sub SendLong(Value As Long) </TT>
+<P>Sends a four-byte representation of the specified long integer to the receiving socket.  This is a tidy shorthand to let the user avoid having to do the conversions using <TT>CopyMemory</TT> (see <TT><A HREF="#method_SendBinary">.SendBinary()</A></TT> for an example).  The converse of this operation is <TT><A HREF="#method_ReceiveLong">.ReceiveLong()</A></TT>.
+
+<A NAME="method_Receive">
+<P><FONT SIZE="+1" COLOR="#006699"><B> Receive </B></FONT>
+<BR><TT> Function Receive(Optional Bytes) </TT>
+<P>Read <TT>Bytes</TT> characters from the buffer where incoming data are temporarily stored.  The buffer is then shortened by that many characters.  If <TT>Bytes</TT> is not specified or <TT>Bytes</TT> is greater than <TT><A HREF="#property_BytesReceived">.BytesReceived</A></TT>, the full contents of the buffer will be retrieved and the buffer cleared.  The string is assumed to be composed of single-byte characters, so each character is converted to a byte using <TT>Asc()</TT>.  Use <TT><A HREF="#method_ReceiveBinary">.ReceiveBinary</A></TT> to receive binary data.  The converse of this operation is <TT><A HREF="#method_Send">.Send()</A></TT>.
+
+<A NAME="method_ReceiveBinary">
+<P><FONT SIZE="+1" COLOR="#006699"><B> ReceiveBinary </B></FONT>
+<BR><TT> Sub ReceiveBinary(ByteArray, Optional Bytes) </TT>
+<P>Read <TT>Bytes</TT> bytes from the buffer where incoming data are temporarily stored.  The buffer is then shortened by that many characters.  If <TT>Bytes</TT> is not specified or <TT>Bytes</TT> is greater than <TT><A HREF="#property_BytesReceived">.BytesReceived</A></TT>, the full contents of the buffer will be retrieved and the buffer cleared.  If <TT>ByteArray</TT> can be <TT>ReDim</TT>ed, it will be to <TT>Bytes</TT> - 1 or however many bytes are actually in the buffer minus one.  If not, be sure the array is of sufficient size to receive the data.  For more information, see <TT><A HREF="#method_SendBinary">.SendBinary</A></TT>, which is the converse of this operation.
+
+<A NAME="method_ReceiveInteger">
+<P><FONT SIZE="+1" COLOR="#006699"><B> ReceiveInteger </B></FONT>
+<BR><TT> Function ReceiveInteger() As Integer </TT>
+<P>Read a two-byte representation of an integer from the buffer where incomming data are temporarily stored and then shorten the buffer by two bytes.  If <TT><A HREF="#property_BytesReceived">.BytesReceived</A></TT> is less than two, an error will be raised.  The converse of this operation is <TT><A HREF="#method_SendInteger">.SendInteger()</A></TT>.
+
+<A NAME="method_ReceiveLong">
+<P><FONT SIZE="+1" COLOR="#006699"><B> ReceiveLong </B></FONT>
+<BR><TT> Function ReceiveLong() As Long </TT>
+<P>Read a four-byte representation of an integer from the buffer where incomming data are temporarily stored and then shorten the buffer by four bytes.  If <TT><A HREF="#property_BytesReceived">.BytesReceived</A></TT> is less than four, an error will be raised.  The converse of this operation is <TT><A HREF="#method_SendLong">.SendLong()</A></TT>.
+
+
+<A NAME="events">
+<P><FONT SIZE="+2" COLOR="#000099"><B> Public Events </B></FONT>
+<BR>The ClientSocket control raises a subset of the standard events the TextBox control raises.  Please refer to VB's documentation for more information.  In addition to these, a number of others are automatically raised, like <TT>LostFocus()</TT>.  These are the events explicitly supported:
+
+<P>
+<A HREF="#event_DataArrival">DataArrival</A> |
+<A HREF="#event_Disconnect">Disconnect</A> |
+<A HREF="#event_Error">Error</A>
+
+<A NAME="event_DataArrival">
+<P><FONT SIZE="+1" COLOR="#006699"><B> DataArrival </B></FONT>
+<BR><TT> Event  DataArrival(Bytes As Long) </TT>
+<P>The socket has just received data from the other side of the connection.  <TT>Bytes</TT> is the same as <TT><A HREF="#property_BytesReceived">.BytesReceived</A></TT>, which is not necessarily how many bytes were just received.  This event is typically responded with by a call to <TT><A HREF="#method_Receive">.Receive</A></TT> or one of its ilk.
+
+<A NAME="event_Disconnect">
+<P><FONT SIZE="+1" COLOR="#006699"><B> Disconnect </B></FONT>
+<BR><TT> Event  Disconnect() </TT>
+<P>The connection has been dropped.  This event won't be raised if <TT><A HREF="#method_Disconnect">.Disconnect</A></TT> was called.  If <TT><A HREF="#event_Error">Error</A></TT> is raised, this event will be raised immediately after, too.
+
+<A NAME="event_Error">
+<P><FONT SIZE="+1" COLOR="#006699"><B> Error </B></FONT>
+<BR><TT> Event  Error(Number As Integer, Description As String) </TT>
+<P>A fatal error occurred.  The connection will be closed and the <TT><A HREF="#event_Disconnect">Disconnect</A></TT> event raised immediately after this one.
+
+
+</FONT></BODY>
+</HTML>
+

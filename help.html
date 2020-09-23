@@ -1,0 +1,169 @@
+<HTML>
+<HEAD>
+<TITLE>TCP/IP Socket Controls Help</TITLE>
+</HEAD>
+<BODY BGCOLOR="#FFFFFF"><FONT FACE="Arial">
+
+
+<CENTER>
+<FONT SIZE="+3" COLOR="#000099"><B> TCP/IP Socket Controls 1.1 </B></FONT>
+<BR><FONT SIZE="+1"> Reference Documentation </FONT>
+<HR>
+</CENTER>
+
+
+<P><FONT SIZE="+2" COLOR="#000099"><B> Table of Contents </B></FONT>
+
+<UL>
+  <LI><A HREF="#introduction"> Introduction</A>
+  <LI><A HREF="#application"> Applying these Controls</A>
+  <LI><A HREF="#revisions"> Control References</A>
+  <UL>
+    <LI><A HREF="clientsocket.html"> ClientSocket Control</A>
+    <LI><A HREF="serversocketbank.html"> ServerSocketBank Control</A>
+    <LI><A HREF="listenersocket.html"> ListenerSocket Control</A>
+    <LI><A HREF="serversocket.html"> ServerSocket Control</A>
+  </UL>
+  <LI><A HREF="#revisions"> Revision History</A>
+  <LI><A HREF="#credits"> Credits</A>
+</UL>
+
+<UL>
+  <BR><B>Extra Documentation:</B>
+  <LI><A HREF="introduction.html"> Internet Programming and the Sockets Controls</A>
+</UL>
+
+
+<A NAME="introduction">
+<P><FONT SIZE="+2" COLOR="#000099"><B> Introduction </B></FONT>
+
+<BR>The primary purpose of this package of controls is to facilitate the creation of TCP/IP (Internet) client and server applications.  It is directed at VB programmers, but the control can be used with other systems that support OCXs, including ASP/VBScript.
+
+<P>Programmers familiar with the Winsock API know it is a frightening and messy API;  a seemingly impenetrable barrier to developing even the most trivial Internet applications.  To make this task a little easier, Microsoft introduced its Winsock control for VB programmers several years ago.  This control greatly simplifies Winsock programming, but still has its caveats.  In addition to still being difficult for the uninitiated TCP/IP programmer and its uselessness to ASP/VBScript programmers, this control's various versions have been plagued with memory leaks, baffling state changes, and other quirks.
+
+<P>This package is intended to rectify most of these problems and to simplify the creation of low- to medium-volume TCP/IP applications.  The first way it does so is by splitting up the basic functionality.  As anyone who has programmed TCP/IP apps knows, there are three basic kinds of sockets developers typically use:  clients, servers, and listeners.  A client socket is one in which its application program directs it to connect to a server socket somewhere in the world in order to send and receive a stream of data.  A server socket is the same, except that it does not initiate the connections.  A listener socket is one used by a server to "listen" for incoming connection requests from clients.  If the application accepts the connection request, it attaches it to a server socket, thus completing the connection circuit.  The listener doesn't transfer application data to or from the client attempting to connect.  It simply delegates server sockets for that purpose.  
+
+<P>To facilitate these three kinds of sockets, this package comes with three controls:  ClientSocket, ServerSocket, and ListenerSocket.  To make life a lot easier, it also comes with a ServerSocketBank control that wraps up a ListenerSocket control and an array of ServerSocket controls; a pool of server sockets which it delegates and manages as needed.  This relieves the developer of server apps from the burden of dealing with dynamically allocating socket resources.  Because ServerSocketBank deals well with delegation, developers will generally never need to directly create the ListenerSocket and ServerSocket controls.
+
+<P>What are this package's limitations?  First, it does not facilitate UDP communications, which are generally used in fast applications - like audio and video streaming - where it's OK to lose data or receive it in random order.  Fortunately, web browsers and most other Internet applications rely exclusively on TCP.  Besides, this package is optimized for simplicity, not speed.  The Winsock API is more appropriate for performance-hungry UDP applications.  Second, it's not yet clear how many sockets can be created, nor how much memory they will take up, so be sure to stress-test your own applications before going to production if you think you'll be dealing with the connection volumes typical of serious server applications.  Third, you can't do odd sorts of things like TraceRoute, ICMP ping, and packet spoofing.  These are capabilities network administrators and criminals (who are not necessarily the same) use for reasons generally unrelated to developing production Internet applications.  Fourth, one needs to make sure not to let any processing take more than a few seconds at a time, as incoming data may be lost.  Fifth, the data receipt buffers in the controls can only hold about as much as any byte array can.  It's important not to allow the <TT>.BytesReceived</TT> property get any higher than that before using <TT>.Receive()</TT> and its ilk to extract the contents of this buffer for any given socket.
+
+
+<A NAME="application">
+<P><FONT SIZE="+2" COLOR="#000099"><B> Applying these Controls </B></FONT>
+<BR>Here is some help for the programmer on how to use these controls in his own applications.
+
+<P>Let's start with a basic example, a simple web browser.  A typical HTTP (web) request happens like this: the client connects to a web server port 80, sends a plain-text request, the server sends back its responds, and finally the server disconnects, indicating the end of the request cycle.  Here's a trivial code sample.  Be sure to create CS as a ClientSocket control on your form or use <TT>CreateObject()</TT> to instantiate the object.
+
+<P><PRE>
+    CS.Connect "www.yahoo.com", 80
+    CS.Send "GET /" & vbCrLf & vbCrLf
+    <FONT COLOR="#000099">While</FONT> CS.Connected
+        Response = Response & CS.Receive
+        CS.DoEvents_
+    <FONT COLOR="#000099">Wend</FONT>
+    <FONT COLOR="#000099">MsgBox</FONT> Response
+</PRE>
+
+<P>Notice this is all in one chunk of code and doesn't involve any event handlers.  One of the beauties of the ClientSocket control is that you can use it without trapping events.  This is especially valuable for ASP programmers, since VBScript doesn't support event trapping of user-instantiated objects like this.
+
+<P>What if we actually wanted to do this asynchronously to allow other things to occur?  Here's an alternative way:
+
+<P><PRE>
+<FONT COLOR="#000099">Dim</FONT> Response <FONT COLOR="#000099">As String</FONT>
+
+<FONT COLOR="#000099">Private Sub</FONT> CS_DataArrival(Bytes <FONT COLOR="#000099">As Long</FONT>)
+    Response = Response & CS.Receive
+<FONT COLOR="#000099">End Sub</FONT>
+
+<FONT COLOR="#000099">Private Sub</FONT> CS_Disconnect()
+    <FONT COLOR="#000099">MsgBox</FONT> Response
+<FONT COLOR="#000099">End Sub</FONT>
+
+<FONT COLOR="#000099">Private Sub</FONT> Form_Load()
+    CS.Connect "www.yahoo.com", 80
+    CS.Send "GET /" & vbCrLf & vbCrLf
+<FONT COLOR="#000099">End Sub</FONT>
+</PRE>
+
+<P>Now what about a server?  Let's create a trivial echo server.  Our server will simply send back whatever it received with a little something extra.  You'll need to create a form with one ServerSocketBank control on it called SSB.
+
+<P><PRE>
+<FONT COLOR="#000099">Private Sub</FONT> Form_Load()
+    SSB.Listen 100
+<FONT COLOR="#000099">End Sub</FONT>
+
+<FONT COLOR="#000099">Private Sub</FONT> SSB_Connected(Index <FONT COLOR="#000099">As Integer</FONT>, Socket <FONT COLOR="#000099">As</FONT> Sockets.ServerSocket)
+    Socket.Send "Hi there.  I'm an echo server" & vbCrLf
+<FONT COLOR="#000099">End Sub</FONT>
+
+<FONT COLOR="#000099">Private Sub</FONT> SSB_DataArrival(Index <FONT COLOR="#000099">As Integer</FONT>, Socket <FONT COLOR="#000099">As</FONT> Sockets.ServerSocket, Bytes <FONT COLOR="#000099">As Long</FONT>)
+    Socket.Send "You sent '" & Socket.Receive & "'" & vbCrLf
+<FONT COLOR="#000099">End Sub</FONT>
+</PRE>
+
+<P>Once your server is running, you can test it using a telnet client.  Try using Start | Run to execute the following command: "<TT>telnet localhost 100</TT>".
+
+<P>The key difference here between the client socket examples above and our server socket bank example, here, is that we tell SSB to listen on port 100 for incoming connections.  The connection is automatically accepted, though we could have selectively rejected it, had we included the <TT>SSB_ConnectionRequest</TT> event handler.  Notice the two event handlers used here pass "Socket", which is a reference to the ServerSocket control for which the given event is relevant.  Keep in mind that we could have more than one connection at any given time.
+
+<P>One very interesting property each of the controls in this package offers is <TT>.ExtraTag</TT>.  This property serves the same function as <TT>.Tag</TT>: it allows you to associate extra data with the object.  But it's a variant, which means it can store just about anything, including an object.  A neat way to use this to store more than one value is to <TT>Set MySocket.ExtraTag = New Collection</TT>.  That way, you can add and use any number of named items like <TT>MySocket.ExtraTag.AddItem X, "Counter"</TT>.  More to the point, if you're creating a server application, you should create a class to associate with each connection "session" to manage its state and so on.  The relevant event handlers would look something like this:
+
+<P><PRE>
+<FONT COLOR="#000099">Private Sub</FONT> SSB_Connected(Index <FONT COLOR="#000099">As Integer</FONT>, Socket <FONT COLOR="#000099">As</FONT> Sockets.ServerSocket)
+    <FONT COLOR="#000099">Set</FONT> Socket.ExtraTag = <FONT COLOR="#000099">New</FONT> SessionManager
+<FONT COLOR="#000099">End Sub</FONT>
+
+<FONT COLOR="#000099">Private Sub</FONT> SSB_Disconnect(Index <FONT COLOR="#000099">As Integer</FONT>, Socket <FONT COLOR="#000099">As</FONT> Sockets.ServerSocket)
+    <FONT COLOR="#000099">Set</FONT> Socket.ExtraTag = <FONT COLOR="#000099">Nothing</FONT>
+<FONT COLOR="#000099">End Sub</FONT>
+</PRE>
+
+<P>Another neat feature of the ServerSocketBank control is that it can be used to broadcast data to all the sockets with one call to <TT>.Broadcast(Text)</TT> or <TT>.BroadcastBinary(ByteArray)</TT>.  This is especially valuable for servers that are designed to interconnect disparate clients like chat servers or as one-way broadcasts like streaming audio.
+
+<P>You should be aware of the fact that the receiving end of a message sent will not necessarily receive all of what's sent in one chunk, nor will messages sent separately be received separately.  This is important, because it implies one needs to design his applications carefully to make sure they can identify the beginnings and ends of discrete message elements like commands and data values.  The HTTP protocol and many other venerable Internet standard protocols do this in part by identifying the end of a header line with <TT>vbCrLf</TT> and the end of the message header with an extra blank line (denoted by one <TT>vbCrLf</TT> right after another one denoting the end of the last header line).  To deal with this, you'll generally need to buffer what's received from a socket when it is received and to try to extract the various messages "intelligently".  The following code sample demonstrates one possible framework for this for a client app:
+
+<P><PRE>
+<FONT COLOR="#000099">Private Sub</FONT> CS_DataArrival(Bytes <FONT COLOR="#000099">As Long</FONT>)
+    <FONT COLOR="#000099">Dim</FONT> Msg <FONT COLOR="#000099">As</FONT> Message, MsgLen <FONT COLOR="#000099">As Long</FONT>
+    Buffer = Buffer & CS.Receive
+    <FONT COLOR="#009900">'You'll need to implement ExtractMessage</FONT>
+    <FONT COLOR="#000099">If</FONT> ExtractMessage(Buffer, Msg, MsgLen) <FONT COLOR="#000099">Then</FONT>
+        Buffer = Mid(Buffer, MsgLen + 1)
+        <FONT COLOR="#009900">'You'll need to implement ProcessMessage</FONT>
+        ProcessMessage Msg
+    <FONT COLOR="#000099">End If</FONT>
+<FONT COLOR="#000099">End Sub</FONT>
+</PRE>
+
+
+<A NAME="controls">
+<P><FONT SIZE="+2" COLOR="#000099"><B> Control References </B></FONT>
+<BR>For reference information about each of the controls, check out these documents:
+
+<UL>
+  <LI><A HREF="clientsocket.html"> ClientSocket Control</A>
+  <LI><A HREF="serversocketbank.html"> ServerSocketBank Control</A>
+  <LI><A HREF="listenersocket.html"> ListenerSocket Control</A>
+  <LI><A HREF="serversocket.html"> ServerSocket Control</A>
+</UL>
+
+
+<A NAME="revisions">
+<P><FONT SIZE="+2" COLOR="#000099"><B> Revision History </B></FONT>
+
+<P><FONT SIZE="+1" COLOR="#006699"><B> Sockets 1.0 </B></FONT>
+<BR><I> Released 20 June 2000 </I>
+<BR>Initial release
+
+<P><FONT SIZE="+1" COLOR="#006699"><B> Sockets 1.1 </B></FONT>
+<BR><I> Released 21 May 2000 </I>
+<BR>Added functionality and help files.
+
+
+<A NAME="credits">
+<P><FONT SIZE="+2" COLOR="#000099"><B> Credits </B></FONT>
+<BR>Versions 1.0 - 1.1 of the Sockets package were created by <B><A HREF="http://alexandria.nu/user/jcarnicelli/">James Vincent Carnicelli</A></B>.  Documentation was prepared by same.
+
+
+</FONT></BODY>
+</HTML>
+
