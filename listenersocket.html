@@ -1,0 +1,106 @@
+<HTML>
+<HEAD>
+<TITLE>TCP/IP Socket Controls Help - ListenerSocket</TITLE>
+</HEAD>
+<BODY BGCOLOR="#FFFFFF"><FONT FACE="Arial">
+
+
+<CENTER>
+<FONT SIZE="+3" COLOR="#000099"><B>
+ <A HREF="help.html">&lt;</A> &nbsp;
+ Sockets - ListenerSocket Control </B></FONT>
+<BR><FONT SIZE="+1"> Reference Documentation </FONT>
+<HR>
+</CENTER>
+
+
+<P><FONT SIZE="+2" COLOR="#000099"><B> Table of Contents </B></FONT>
+
+<UL>
+  <LI><A HREF="#declarations"> Public Declarations</A>
+  <LI><A HREF="#properties"> Public Properties</A>
+  <LI><A HREF="#methods"> Public Methods</A>
+  <LI><A HREF="#events"> Public Events</A>
+</UL>
+
+
+<A NAME="declarations">
+<P><FONT SIZE="+2" COLOR="#000099"><B> Public Declarations </B></FONT>
+<BR>The ListenerSocket control offers no public declarations.
+
+
+<A NAME="properties">
+<P><FONT SIZE="+2" COLOR="#000099"><B> Public Properties </B></FONT>
+<BR>In addition to the properties implicitly available through Visual Basic, like <TT>.Name</TT> and <TT>.Tag</TT>, the ListenerSocket control explicitly offers a few publicly available properties:
+
+<P>
+<A HREF="#property_ExtraTag">ExtraTag</A> |
+<A HREF="#property_Listening">Listening</A> |
+<A HREF="#property_Port">Port</A>
+
+
+<A NAME="property_ExtraTag">
+<P><FONT SIZE="+1" COLOR="#006699"><B> ExtraTag </B></FONT>
+<BR><I> Read/Write, Variant </I>
+<BR>Stores a miscellaneous datum of any type a Variant can store.  Same basic functionality as <TT>.Tag</TT>.  The control never uses this datum for decision-making, nor changes it.
+
+<A NAME="property_Listening">
+<P><FONT SIZE="+1" COLOR="#006699"><B> Listening </B></FONT>
+<BR><I> Read-Only, Boolean </I>
+<BR>Is this control currently listening for incoming connections?  See <TT><A HREF="#method_Listen">.Listen()</A></TT> for more.
+
+<A NAME="property_Port">
+<P><FONT SIZE="+1" COLOR="#006699"><B> Port </B></FONT>
+<BR><I> Read/Write, Integer </I>
+<BR>The port (e.g., "80" or "23") that the control is listening for connections on.  Changing this value while listening has no effect until <TT><A HREF="#method_Listen">.Listen()</A></TT> is again called.
+
+
+<A NAME="methods">
+<P><FONT SIZE="+2" COLOR="#000099"><B> Public Methods </B></FONT>
+<BR>The ListenerSocket control explicitly offers a number of publicly available methods:
+
+<P>
+<A HREF="#method_DoEvents_">DoEvents_</A> |
+<A HREF="#method_Listen">Listen</A> |
+<A HREF="#method_StopListening">StopListening</A>
+
+
+<A NAME="method_DoEvents_">
+<P><FONT SIZE="+1" COLOR="#006699"><B> DoEvents_ </B></FONT>
+<BR><TT> Sub DoEvents_() </TT>
+<P>This just executes VB's built in <TT>DoEvents</TT> statement.  It's mainly included for VBScript programs, which don't have DoEvents available.
+
+<A NAME="method_Listen">
+<P><FONT SIZE="+1" COLOR="#006699"><B> Listen </B></FONT>
+<BR><TT> Sub Listen(Optional Port) </TT>
+<P>Start listening for connection requests from client sockets.  The <TT><A HREF="#event_ConnectionRequest">ConnectionRequest</A></TT> event is triggered when a client attempts to connect.  If the control is already <TT><A HREF="#property_Listening">.Listening</A></TT>, it will stop listening on the current <TT><A HREF="#property_Port">.Port</A></TT> and start listening on the new one.  If <TT>Port</TT> is not specified, the previously-specified <TT><A HREF="#property_Port">.Port</A></TT> is used.  To stop listening, use the <TT><A HREF="#method_StopListening">.StopListening</A></TT> method.
+
+<A NAME="method_StopListening">
+<P><FONT SIZE="+1" COLOR="#006699"><B> StopListening </B></FONT>
+<BR><TT> Sub StopListening() </TT>
+<P>Stop listening for connection requests from client sockets.  Calling this method when the control is not <TT><A HREF="#property_Listening">.Listening</A></TT> does nothing.  To start listening, again, use the <TT><A HREF="#method_Listen">.Listen</A></TT> method.
+
+
+<A NAME="events">
+<P><FONT SIZE="+2" COLOR="#000099"><B> Public Events </B></FONT>
+<BR>The ListenerSocket control raises a subset of the standard events the TextBox control raises.  Please refer to VB's documentation for more information.  In addition to these, a number of others are automatically raised, like <TT>LostFocus()</TT>.  These are the events explicitly supported:
+
+<P>
+<A HREF="#event_ConnectionRequest">ConnectionRequest</A> |
+<A HREF="#event_Error">Error</A>
+
+
+<A NAME="event_ConnectionRequest">
+<P><FONT SIZE="+1" COLOR="#006699"><B> ConnectionRequest </B></FONT>
+<BR><TT> Event  ConnectionRequest(RequestId As Long, FromHost As String) </TT>
+<P>A client socket has attempted to connect to this server on its <TT><A HREF="#property_Port">.Port</A></TT>.  <TT>FromHost</TT> will contain a host name (e.g., "yahoo.com") or, if none is found, an IP address (e.g., "51.1.10.255").  This can be used to decide whether or not to accept the request.  To accept it, call <TT><A HREF="serversocket.html#method_Accept">.Accept(RequestId)</A></TT> on a <A HREF="serversocket.html">ServerSocket</A> control.  One need not do anything to reject a connection request.
+
+<A NAME="event_Error">
+<P><FONT SIZE="+1" COLOR="#006699"><B> Error </B></FONT>
+<BR><TT> Event  Error(Number As Integer, Description As String) </TT>
+<P>A fatal error occurred.  The socket has stopped listening.
+
+
+</FONT></BODY>
+</HTML>
+
